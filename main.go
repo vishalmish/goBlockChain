@@ -5,19 +5,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"strconv"
-	"time"
 )
 
-type Block struct {
-	Timestamp     int64
-	Data          []byte
-	PrevBlockHash []byte
-	Hash          []byte
-}
-
-type Blockchain struct {
-	blocks []*Block
-}
 
 func main() {
 
@@ -28,6 +17,8 @@ func main() {
 	for _, block := range bc.blocks {
 		fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %x\n", block.Hash)
+		pow := NewProofOfWork(block)
+		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
 		fmt.Println()
 	}
 }
@@ -38,38 +29,5 @@ func (b *Block) SetHash() {
 	hash := sha256.Sum256(headers)
 
 	b.Hash = hash[:]
-}
-
-/**
- * Create a new Block. This can then be added through AddBlock
- */
-func NewBlock(data string, prevBlockHash []byte) *Block {
-	block := &Block{time.Now().Unix(), []byte(data), prevBlockHash, []byte{}}
-	block.SetHash()
-	return block
-}
-
-/**
- * Add a new block into the block chain.
- */
-func (bc *Blockchain) AddBlock(data string) {
-	prevBlock := bc.blocks[len(bc.blocks) - 1]
-	newBlock := NewBlock(data, prevBlock.Hash)
-	bc.blocks = append(bc.blocks, newBlock)
-}
-
-/**
- * For a brand new Blockchain, we need to have 1 genesis block to start addding
- * more blocks.
- */
-func NewGenesisBlock() *Block {
-	return NewBlock("Genesis Block", []byte{})
-}
-
-/**
- * Create a new Blockchain with a NewGenesisBlock.
- */
-func NewBlockchain() *Blockchain {
-	return &Blockchain{[]*Block{NewGenesisBlock()}}
 }
 
